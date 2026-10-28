@@ -1,8 +1,35 @@
+import { useEffect, useState } from 'react';
 import MovieGrid from '../components/MovieGrid';
 
+const FAVORITES_KEY = 'movieshelf_favorites';
+
 function Favorites() {
-  // Placeholder - students will implement localStorage retrieval
-  const favoriteMovies = [];
+  const [favoriteMovies, setFavoriteMovies] = useState([]);
+
+  function loadFavorites() {
+    try {
+      const savedFavorites = JSON.parse(localStorage.getItem(FAVORITES_KEY)) || [];
+      setFavoriteMovies(savedFavorites);
+    } catch {
+      setFavoriteMovies([]);
+    }
+  }
+
+  useEffect(() => {
+    loadFavorites();
+
+    function handleStorageChange() {
+      loadFavorites();
+    }
+
+    window.addEventListener('storage', handleStorageChange);
+    window.addEventListener('favoritesUpdated', handleStorageChange);
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('favoritesUpdated', handleStorageChange);
+    };
+  }, []);
 
   return (
     <main className="main-content">
@@ -19,6 +46,6 @@ function Favorites() {
       )}
     </main>
   );
-};
+}
 
 export default Favorites;
